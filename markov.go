@@ -20,9 +20,15 @@ type Graph struct {
 func (graph *Graph) LoadPhrase(phrase string) {
 	words := strings.Split(phrase, " ")
 	// Get the words in reverse order, just to make it easier to input the next word in the chain.
-	var prevVal *link = nil //Start prevVal as nil, to
+	var prevVal *link = nil //Start prevVal as nil, as the first word to appear will be the last one in the phrase.
 	for i := len(words) - 1; i >= 0; i-- {
-		prevVal = graph.loadWord(words[i], prevVal, (i == 0), make([]*string, 0)) //Last arg, if i is 0 then it is the start of the sentence, despite being at the end of the loop.
+		depthToGo := lesser(i, graph.contextDepth)
+		context := make([]*string, depthToGo)
+		for j := depthToGo; j > 0; j-- {
+			indexToGrab := i - j
+			context[j-1] = &words[indexToGrab]
+		}
+		prevVal = graph.loadWord(words[i], prevVal, (i == 0), context) //Last arg, if i is 0 then it is the start of the sentence, despite being at the end of the loop.
 	}
 }
 
@@ -40,8 +46,9 @@ func (graph *Graph) GenerateMarkovString() string {
 //private, implementation details.
 
 type link struct {
-	value string
-	links []*link
+	value   string
+	links   []*link
+	context []*string
 }
 
 type list struct {
@@ -75,4 +82,11 @@ func (graph *Graph) findInGraph(val string) *link {
 		}
 	}
 	return nil
+}
+
+func lesser(x int, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }
