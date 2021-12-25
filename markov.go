@@ -9,8 +9,10 @@ import (
 
 //Graph is the generic holder of all of the data for a certain graph of words needed to generate a markov chain.
 type Graph struct {
-	starters list
-	allWords list
+	starters     list
+	allWords     list
+	strings      []string
+	contextDepth int
 }
 
 //LoadPhrase loads a whole phrase (be it a sentence, single word that someone said, or paragraph) into the graph.
@@ -20,7 +22,7 @@ func (graph *Graph) LoadPhrase(phrase string) {
 	// Get the words in reverse order, just to make it easier to input the next word in the chain.
 	var prevVal *link = nil //Start prevVal as nil, to
 	for i := len(words) - 1; i >= 0; i-- {
-		prevVal = graph.loadWord(words[i], prevVal, (i == 0)) //Last arg, if i is 0 then it is the start of the sentence, despite being at the end of the loop.
+		prevVal = graph.loadWord(words[i], prevVal, (i == 0), make([]*string, 0)) //Last arg, if i is 0 then it is the start of the sentence, despite being at the end of the loop.
 	}
 }
 
@@ -46,7 +48,9 @@ type list struct {
 	links []*link
 }
 
-func (graph *Graph) loadWord(val string, nextval *link, starter bool) *link {
+//loadWord loads a word into the respective graph. It creates a link if one doesn't exist,
+// and links the current word to both previous (if higher context is on) and next words.
+func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []*string) *link {
 	l := graph.findInGraph(val)
 	if l == nil {
 		l = &link{
