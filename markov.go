@@ -83,7 +83,18 @@ func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []
 func (graph *Graph) findInGraph(val string, context []*string) *link {
 	for i, v := range graph.allWords.links {
 		if *v.value == val {
-			return graph.allWords.links[i]
+			contextMatching := true
+			if len(v.context) != len(context) {
+				continue
+			}
+			for j, ctx := range v.context {
+				if ctx != context[j] {
+					contextMatching = false
+				}
+			}
+			if contextMatching {
+				return graph.allWords.links[i]
+			}
 		}
 	}
 	return nil
