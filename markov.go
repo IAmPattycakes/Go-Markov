@@ -42,8 +42,10 @@ func (graph *Graph) LoadPhrase(phrase string) {
 func (graph *Graph) GenerateMarkovString() string {
 	var ret string
 	var currLink *link = graph.starters.links[rand.Intn(len(graph.starters.links))]
+	ret += *currLink.value
+	currLink = currLink.links[rand.Intn(len(currLink.links))]
 	for currLink != nil {
-		ret += *currLink.value + " "
+		ret += " " + *currLink.value
 		currLink = currLink.links[rand.Intn(len(currLink.links))]
 	}
 	return ret
