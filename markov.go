@@ -28,7 +28,7 @@ func (graph *Graph) LoadPhrase(phrase string) {
 			indexToGrab := i - j
 			context[j-1] = &words[indexToGrab]
 		}
-		prevVal = graph.loadWord(words[i], prevVal, (i == 0), context) //Last arg, if i is 0 then it is the start of the sentence, despite being at the end of the loop.
+		prevVal = graph.loadWord(words[i], prevVal, (i == 0), context)
 	}
 }
 
@@ -37,7 +37,7 @@ func (graph *Graph) GenerateMarkovString() string {
 	var ret string
 	var currLink *link = graph.starters.links[rand.Intn(len(graph.starters.links))]
 	for currLink != nil {
-		ret += currLink.value + " "
+		ret += *currLink.value + " "
 		currLink = currLink.links[rand.Intn(len(currLink.links))]
 	}
 	return ret
@@ -46,7 +46,7 @@ func (graph *Graph) GenerateMarkovString() string {
 //private, implementation details.
 
 type link struct {
-	value   string
+	value   *string
 	links   []*link
 	context []*string
 }
@@ -58,11 +58,16 @@ type list struct {
 //loadWord loads a word into the respective graph. It creates a link if one doesn't exist,
 // and links the current word to both previous (if higher context is on) and next words.
 func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []*string) *link {
-	l := graph.findInGraph(val)
+	l := graph.findInGraph(val, context)
 	if l == nil {
+		ctx := make([]*string, len(context))
+		for i, v := range context {
+			ctx[i] = graph.findString(*v)
+		}
 		l = &link{
-			value: val,
-			links: []*link{nextval},
+			value:   graph.findString(val),
+			links:   []*link{nextval},
+			context: ctx,
 		}
 		graph.allWords.links = append(graph.allWords.links, l)
 	} else {
@@ -75,13 +80,23 @@ func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []
 	return l
 }
 
-func (graph *Graph) findInGraph(val string) *link {
+func (graph *Graph) findInGraph(val string, context []*string) *link {
 	for i, v := range graph.allWords.links {
-		if v.value == val {
+		if *v.value == val {
 			return graph.allWords.links[i]
 		}
 	}
 	return nil
+}
+
+func (graph *Graph) findString(val string) *string {
+	for i, v := range graph.strings {
+		if v == val {
+			return &graph.strings[i]
+		}
+	}
+	graph.strings = append(graph.strings, val)
+	return &graph.strings[len(graph.strings)-1]
 }
 
 func lesser(x int, y int) int {
