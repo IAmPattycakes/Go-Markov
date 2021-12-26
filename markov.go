@@ -96,7 +96,7 @@ func (graph *Graph) findInGraph(val string, context []*string) *link {
 				continue
 			}
 			for j, ctx := range v.context {
-				if ctx != context[j] {
+				if *ctx != *context[j] {
 					contextMatching = false
 				}
 			}

@@ -7,8 +7,7 @@ import (
 
 func TestStringGeneration(t *testing.T) {
 	g := NewGraph(1)
-	//strlist := []string{"1 2 3 4 5", "1 3 5 4 2", "1 3 4 5 2", "2 3 4 5 1", "1 5 3 2 4", "5 4 3 2 1", "4 3 1 2 5"}
-	strlist := []string{"1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"}
+	strlist := []string{"1 2 3 4 5", "1 3 5 4 2", "1 3 4 5 2", "2 3 4 5 1", "1 5 3 2 4", "5 4 3 2 1", "4 3 1 2 5"}
 	for _, v := range strlist {
 		g.LoadPhrase(v)
 	}
@@ -30,10 +29,6 @@ func TestStringGeneration(t *testing.T) {
 			}
 		}
 		fmt.Println(v)
-	}
-	for _, v := range g.allWords.links {
-		fmt.Printf("value: %s, ctx len: %d, ctx: %s, links: ", *v.value, len(v.context), safeval(v.context, 0))
-		fmt.Println(v.links)
 	}
 	if !notSeenBefore {
 		t.Error("No new strings were ever generated")
