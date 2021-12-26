@@ -32,9 +32,17 @@ func TestStringGeneration(t *testing.T) {
 		fmt.Println(v)
 	}
 	for _, v := range g.allWords.links {
-		fmt.Printf("value: %s, ctx len: %d\n", *v.value, len(v.context))
+		fmt.Printf("value: %s, ctx len: %d, ctx: %s, links: ", *v.value, len(v.context), safeval(v.context, 0))
+		fmt.Println(v.links)
 	}
 	if !notSeenBefore {
 		t.Error("No new strings were ever generated")
 	}
+}
+
+func safeval(list []*string, num int) string {
+	if num >= len(list) {
+		return ""
+	}
+	return *list[num]
 }
