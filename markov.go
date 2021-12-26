@@ -15,6 +15,12 @@ type Graph struct {
 	contextDepth int
 }
 
+func NewGraph(depth int) *Graph {
+	var g Graph
+	g.contextDepth = depth
+	return &g
+}
+
 //LoadPhrase loads a whole phrase (be it a sentence, single word that someone said, or paragraph) into the graph.
 //Splits the phrase along spaces in order to load each word into the chain.
 func (graph *Graph) LoadPhrase(phrase string) {
