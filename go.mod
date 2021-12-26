@@ -1,3 +1,3 @@
-module github.com/IAmPattycakes/Go-Markov/v2
+module github.com/IAmPattycakes/Go-Markov
 
 go 1.17
