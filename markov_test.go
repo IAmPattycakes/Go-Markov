@@ -34,10 +34,3 @@ func TestStringGeneration(t *testing.T) {
 		t.Error("No new strings were ever generated")
 	}
 }
-
-func safeval(list []*string, num int) string {
-	if num >= len(list) {
-		return ""
-	}
-	return *list[num]
-}
