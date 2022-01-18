@@ -55,7 +55,7 @@ func (graph *Graph) GenerateMarkovString() string {
 
 //
 func (graph *Graph) KeyCount() uint64 {
-	return len(graph.allWords)
+	return len(graph.allWords.links)
 }
 
 //Stats gives the mean branches per node, median branches per node, and number of un-branched nodes
@@ -65,14 +65,14 @@ func (graph *Graph) Stats() (float32, int, uint64) {
 	for _, v := range graph.allWords.links {
 		m[len(v.links)]++
 	}
-	biggest, sum := 0
+	biggest, sum := 0, 0
 	for k, v := range m {
 		if v > biggest {
 			biggest = k
 		}
 		sum += k*v
 	}
-	return float32(sum)/float32(len(allWords)), biggest, m[0] + m[1]
+	return float32(sum)/float32(len(graph.allWords)), biggest, int64(m[0] + m[1])
 }
 
 //private, implementation details.
