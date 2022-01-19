@@ -12,7 +12,7 @@ import (
 type Graph struct {
 	starters     list
 	allWords     list
-	strings      []string
+	strings      map[string]string //This feels wrong but 🤷‍♂️
 	contextDepth int
 	wordMap      map[string]*link
 }
@@ -101,7 +101,14 @@ type list struct {
 //loadWord loads a word into the respective graph. It creates a link if one doesn't exist,
 // and links the current word to both previous (if higher context is on) and next words.
 func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []*string) *link {
-	concatKey := fmt.Sprintf("%s %s", val, strings.Join(context, " "))
+	ctxstr := ""
+	for i, v := range context {
+		ctxstr += *v
+		if i != len(context) - 1 {
+			ctxstr += " "
+		}
+	}
+	concatKey := fmt.Sprintf("%s %s", val, ctxstr)
 	l := graph.wordMap[concatKey]
 	
 	if l == nil {
@@ -127,13 +134,11 @@ func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []
 }
 
 func (graph *Graph) findString(val string) *string {
-	for i, v := range graph.strings {
-		if v == val {
-			return &graph.strings[i]
-		}
+	v := graph.strings[val]
+	if v == "" {
+		graph.strings[val] = val
 	}
-	graph.strings = append(graph.strings, val)
-	return &graph.strings[len(graph.strings)-1]
+	return &graph.strings[val]
 }
 
 func lesser(x int, y int) int {
