@@ -101,7 +101,7 @@ type list struct {
 //loadWord loads a word into the respective graph. It creates a link if one doesn't exist,
 // and links the current word to both previous (if higher context is on) and next words.
 func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []*string) *link {
-	concatKey := fmt.Sprintf("%s %s", val, strings.Join(context, " ")
+	concatKey := fmt.Sprintf("%s %s", val, strings.Join(context, " "))
 	l := graph.wordMap[concatKey]
 	
 	if l == nil {
