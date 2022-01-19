@@ -58,21 +58,30 @@ func (graph *Graph) KeyCount() int {
 	return len(graph.allWords.links)
 }
 
-//Stats gives the mean branches per node, median branches per node, and number of un-branched nodes
-//in the graph. 
-func (graph *Graph) Stats() (float32, int, int) {
+//Stats gives the mean branches per node, median branches per node, mode branches per node, 
+//and number of un-branched nodes in the graph. 
+func (graph *Graph) Stats() (float32,int, int, int) {
 	m := make(map[int]int, 0)
 	for _, v := range graph.allWords.links {
 		m[len(v.links)]++
 	}
-	biggest, sum := 0, 0
+	biggest, bigK, sum, instances, median := 0, 0, 0, 0 ,0
 	for k, v := range m {
 		if v > biggest {
-			biggest = k
+			biggest = v
+			bigK = k
 		}
 		sum += k*v
+		instances += v
 	}
-	return float32(sum)/float32(len(graph.allWords.links)), biggest, int(m[0] + m[1])
+	for k, v := range m {
+		instances -= v*2
+		if(instances < 0) {
+			median = k
+			break
+		}
+	}
+	return float32(sum)/float32(len(graph.allWords.links)), median, biggest, int(m[0] + m[1])
 }
 
 //private, implementation details.
