@@ -3,6 +3,7 @@ package markov
 import (
 	"math/rand"
 	"strings"
+	"fmt"
 )
 
 //PUBLIC
@@ -11,8 +12,9 @@ import (
 type Graph struct {
 	starters     list
 	allWords     list
-	strings      []string
+	strings      map[string]string //This feels wrong but 🤷‍♂️
 	contextDepth int
+	wordMap      map[string]*link
 }
 
 func NewGraph(depth int) *Graph {
@@ -51,6 +53,39 @@ func (graph *Graph) GenerateMarkovString() string {
 	return ret
 }
 
+//Benchmarking functions
+
+//
+func (graph *Graph) KeyCount() int {
+	return len(graph.allWords.links)
+}
+
+//Stats gives the mean branches per node, median branches per node, mode branches per node, 
+//and number of un-branched nodes in the graph. 
+func (graph *Graph) Stats() (float32,int, int, int) {
+	m := make(map[int]int, 0)
+	for _, v := range graph.allWords.links {
+		m[len(v.links)]++
+	}
+	biggest, bigK, sum, instances, median := 0, 0, 0, 0 ,0
+	for k, v := range m {
+		if v > biggest {
+			biggest = v
+			bigK = k
+		}
+		sum += k*v
+		instances += v
+	}
+	for k, v := range m {
+		instances -= v*2
+		if(instances < 0) {
+			median = k
+			break
+		}
+	}
+	return float32(sum)/float32(len(graph.allWords.links)), median, bigK, int(m[0] + m[1])
+}
+
 //private, implementation details.
 
 type link struct {
@@ -66,7 +101,16 @@ type list struct {
 //loadWord loads a word into the respective graph. It creates a link if one doesn't exist,
 // and links the current word to both previous (if higher context is on) and next words.
 func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []*string) *link {
-	l := graph.findInGraph(val, context)
+	ctxstr := ""
+	for i, v := range context {
+		ctxstr += *v
+		if i != len(context) - 1 {
+			ctxstr += " "
+		}
+	}
+	concatKey := fmt.Sprintf("%s %s", val, ctxstr)
+	l := graph.wordMap[concatKey]
+	
 	if l == nil {
 		ctx := make([]*string, len(context))
 		for i, v := range context {
@@ -78,6 +122,7 @@ func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []
 			context: ctx,
 		}
 		graph.allWords.links = append(graph.allWords.links, l)
+		graph.wordMap[concatKey] = l
 	} else {
 		l.links = append(l.links, nextval)
 	}
@@ -88,34 +133,12 @@ func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []
 	return l
 }
 
-func (graph *Graph) findInGraph(val string, context []*string) *link {
-	for i, v := range graph.allWords.links {
-		if *v.value == val {
-			contextMatching := true
-			if len(v.context) != len(context) {
-				continue
-			}
-			for j, ctx := range v.context {
-				if *ctx != *context[j] {
-					contextMatching = false
-				}
-			}
-			if contextMatching {
-				return graph.allWords.links[i]
-			}
-		}
-	}
-	return nil
-}
-
 func (graph *Graph) findString(val string) *string {
-	for i, v := range graph.strings {
-		if v == val {
-			return &graph.strings[i]
-		}
+	v := graph.strings[val]
+	if v == "" {
+		graph.strings[val] = val
 	}
-	graph.strings = append(graph.strings, val)
-	return &graph.strings[len(graph.strings)-1]
+	return &graph.strings[val]
 }
 
 func lesser(x int, y int) int {
