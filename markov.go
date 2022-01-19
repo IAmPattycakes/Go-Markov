@@ -3,6 +3,7 @@ package markov
 import (
 	"math/rand"
 	"strings"
+	"fmt"
 )
 
 //PUBLIC
@@ -13,6 +14,7 @@ type Graph struct {
 	allWords     list
 	strings      []string
 	contextDepth int
+	wordMap      map[string]*link
 }
 
 func NewGraph(depth int) *Graph {
@@ -81,7 +83,7 @@ func (graph *Graph) Stats() (float32,int, int, int) {
 			break
 		}
 	}
-	return float32(sum)/float32(len(graph.allWords.links)), median, biggest, int(m[0] + m[1])
+	return float32(sum)/float32(len(graph.allWords.links)), median, bigK, int(m[0] + m[1])
 }
 
 //private, implementation details.
@@ -99,7 +101,9 @@ type list struct {
 //loadWord loads a word into the respective graph. It creates a link if one doesn't exist,
 // and links the current word to both previous (if higher context is on) and next words.
 func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []*string) *link {
-	l := graph.findInGraph(val, context)
+	concatKey := fmt.Sprintf("%s %s", val, strings.Join(context, " ")
+	l := graph.wordMap[concatKey]
+	
 	if l == nil {
 		ctx := make([]*string, len(context))
 		for i, v := range context {
@@ -111,6 +115,7 @@ func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []
 			context: ctx,
 		}
 		graph.allWords.links = append(graph.allWords.links, l)
+		graph.wordMap[concatKey] = l
 	} else {
 		l.links = append(l.links, nextval)
 	}
@@ -119,26 +124,6 @@ func (graph *Graph) loadWord(val string, nextval *link, starter bool, context []
 		graph.starters.links = append(graph.starters.links, l)
 	}
 	return l
-}
-
-func (graph *Graph) findInGraph(val string, context []*string) *link {
-	for i, v := range graph.allWords.links {
-		if *v.value == val {
-			contextMatching := true
-			if len(v.context) != len(context) {
-				continue
-			}
-			for j, ctx := range v.context {
-				if *ctx != *context[j] {
-					contextMatching = false
-				}
-			}
-			if contextMatching {
-				return graph.allWords.links[i]
-			}
-		}
-	}
-	return nil
 }
 
 func (graph *Graph) findString(val string) *string {
