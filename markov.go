@@ -57,6 +57,18 @@ func (graph *RamGraph) GenerateMarkovString() string {
 	return ret
 }
 
+func (graph *RamGraph) GetMap() *map[string][]string {
+	m := make(map[string][]string)
+	for k, v := graph.nodes {
+		slice := make([]string, len(v))
+		for i, v2 := range v {
+			slice[i] = *v2.value
+		}
+		m[k] = slice
+	}
+	return &m
+}
+
 //private, implementation details.
 
 type link struct {
@@ -103,24 +115,6 @@ func (graph *RamGraph) findInGraph(val string, context []*string) *link {
 	}
 	key += val
 	return graph.nodes[key]
-
-	// for i, v := range graph.allWords.links {
-	// 	if *v.value == val {
-	// 		contextMatching := true
-	// 		if len(v.context) != len(context) {
-	// 			continue
-	// 		}
-	// 		for j, ctx := range v.context {
-	// 			if *ctx != *context[j] {
-	// 				contextMatching = false
-	// 			}
-	// 		}
-	// 		if contextMatching {
-	// 			return graph.allWords.links[i]
-	// 		}
-	// 	}
-	// }
-	// return nil
 }
 
 func (graph *RamGraph) findString(val string) *string {
