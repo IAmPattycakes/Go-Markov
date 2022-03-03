@@ -59,7 +59,7 @@ func (graph *RamGraph) GenerateMarkovString() string {
 
 func (graph *RamGraph) GetMap() *map[string][]string {
 	m := make(map[string][]string)
-	for k, v := graph.nodes {
+	for k, v := range graph.nodes {
 		slice := make([]string, len(v))
 		for i, v2 := range v {
 			slice[i] = *v2.value
